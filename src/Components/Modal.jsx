@@ -12,6 +12,9 @@ const Modal = forwardRef(function Modal({ title, cart, actions }, ref) {
       checkout() {
         dialog.current.showModal();
       },
+      success() {
+        dialog.current.showModal();
+      },
     };
   });
 
