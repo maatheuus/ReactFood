@@ -1,21 +1,10 @@
-import { useEffect, useState } from "react";
+// import { useEffect, useState } from "react";
 import MealsItems from "./MealsItems";
 import { fetchAvailableMeals } from "../http";
+import { useFetch } from "../hooks/useFetch";
 
 function Meals() {
-  const [isLoading, setIsLoading] = useState(false);
-  const [mealsItems, setMealsItems] = useState([]);
-
-  useEffect(() => {
-    async function mealsFn() {
-      setIsLoading(true);
-      const meals = await fetchAvailableMeals();
-
-      setMealsItems(meals);
-      setIsLoading(false);
-    }
-    mealsFn();
-  }, []);
+  const { isLoading, mealsItems } = useFetch(fetchAvailableMeals);
 
   return (
     <main>

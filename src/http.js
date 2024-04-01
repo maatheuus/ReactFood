@@ -8,7 +8,9 @@ export async function fetchAvailableMeals() {
   return response;
 }
 
-export async function fetchSubmittedOrder(order) {
+export async function fetchSubmittedOrder(order = null) {
+  if (order === null) return;
+
   const header = {
     method: "POST",
     body: JSON.stringify({ order }),

@@ -66,8 +66,16 @@ function CartProvider({ children }) {
     dispatch({ type: "REMOVE_ITEM", item });
   }
 
+  const totalItems = state.items.reduce(
+    (amount, currentPrice) =>
+      (amount + +currentPrice.price) * +currentPrice.quantity,
+    0
+  );
+  const totalItemsFixed = totalItems.toFixed(2);
+
   const ctxValue = {
     items: state.items,
+    totalItemsFixed,
     addToCart: handleAddToCart,
     removeToCart: handleRemoveToCart,
   };

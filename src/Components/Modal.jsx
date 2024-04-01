@@ -1,7 +1,7 @@
 import { useRef, useImperativeHandle, forwardRef } from "react";
 import { createPortal } from "react-dom";
 
-const Modal = forwardRef(function Modal({ title, cart, actions }, ref) {
+const Modal = forwardRef(function Modal({ cart, actions }, ref) {
   const dialog = useRef();
 
   useImperativeHandle(ref, () => {
@@ -9,20 +9,15 @@ const Modal = forwardRef(function Modal({ title, cart, actions }, ref) {
       open() {
         dialog.current.showModal();
       },
-      checkout() {
-        dialog.current.showModal();
-      },
-      success() {
-        dialog.current.showModal();
-      },
     };
   });
 
   return createPortal(
     <dialog className="modal" ref={dialog}>
-      <h2>{title}</h2>
       {cart}
-      <div className="modal-actions">{actions}</div>
+      <div className="modal-actions">
+        <form method="dialog">{actions}</form>
+      </div>
     </dialog>,
     document.getElementById("modal")
   );

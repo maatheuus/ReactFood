@@ -36,8 +36,8 @@ function modalDispatch(state, action) {
   if (action.type === "CLOSE_MODAL") {
     return {
       ...state,
-      checkoutIsOpen: false,
       cartIsOpen: false,
+      checkoutIsOpen: false,
       successCartIsOpen: false,
     };
   }
@@ -58,6 +58,7 @@ function ModalProvider({ children }) {
   function checkoutModal() {
     dispatch({ type: "OPEN_CHECKOUT_MODAL", open: true });
   }
+
   function successMessage() {
     dispatch({ type: "OPEN_SUCCESS_MODAL", open: true });
   }

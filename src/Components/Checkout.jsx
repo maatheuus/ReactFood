@@ -1,18 +1,18 @@
-import { useContext, useEffect, useRef, useState } from "react";
+import { useContext, useRef } from "react";
 import { ModalContext } from "../context/modal-context";
-import Modal from "./Modal";
-import Button from "./Button";
 import { CartContext } from "../context/cart-context";
 import { fetchSubmittedOrder } from "../http";
 
-function Checkout() {
-  const [order, setOrder] = useState();
+import Modal from "./Modal";
+import Button from "./Button";
+import { useFetch } from "../hooks/useFetch";
 
-  const [messageSuccess, setMessageSuccess] = useState(undefined);
+function Checkout() {
+  const { messageSuccess, setOrder } = useFetch(fetchSubmittedOrder);
 
   const { checkoutIsOpen, successCartIsOpen, successMessage, close } =
     useContext(ModalContext);
-  const { items } = useContext(CartContext);
+  const { items, totalItemsFixed } = useContext(CartContext);
 
   const dialog = useRef();
   const fullNameOrder = useRef();
@@ -20,16 +20,6 @@ function Checkout() {
   const streetOrder = useRef();
   const postalCodeOrder = useRef();
   const cityOrder = useRef();
-
-  const totalItems = items.reduce(
-    (amount, currentPrice) =>
-      (amount + +currentPrice.price) * +currentPrice.quantity,
-    0
-  );
-  const totalItemsFixed = totalItems.toFixed(2);
-
-  const checkout = messageSuccess === undefined;
-  const messageIsSuccess = messageSuccess !== undefined;
 
   function submitOrder() {
     const datasUser = {
@@ -43,34 +33,40 @@ function Checkout() {
       },
     };
 
-    setOrder(datasUser);
     successMessage();
+    setOrder(datasUser);
   }
 
-  useEffect(() => {
-    async function orderFn() {
-      if (successCartIsOpen) {
-        const submittedOrder = await fetchSubmittedOrder(order);
-
-        submittedOrder?.message
-          ? setMessageSuccess(submittedOrder.message)
-          : null;
-      }
-    }
-    orderFn();
-  }, [order, items, successCartIsOpen]);
-
-  if (checkoutIsOpen && checkout) dialog?.current?.checkout();
-  if (messageIsSuccess && successCartIsOpen) dialog?.current?.success();
+  if (checkoutIsOpen) dialog?.current?.open();
+  if (successCartIsOpen) dialog?.current?.open();
 
   return (
     <>
-      {checkoutIsOpen && checkout && (
-        <Modal
-          ref={dialog}
-          title="Checkout"
-          cart={
+      <Modal
+        ref={dialog}
+        cart={
+          successCartIsOpen ? (
             <form className="control" method="dialog">
+              {messageSuccess ? (
+                <>
+                  <h2>Success</h2>
+                  <p>Your order was submitted successfully.</p>
+                  <p>
+                    We will get back to you with more detail via email within
+                    the new few minutes.
+                  </p>
+                </>
+              ) : (
+                <>
+                  <h2>Error</h2>
+                  <p>Your order was not submitted successfully.</p>
+                  <p>Try again in a fill minutes, please!.</p>
+                </>
+              )}
+            </form>
+          ) : (
+            <form className="control" method="dialog">
+              <h2>Checkout</h2>
               <p>
                 Total amount <span>${totalItemsFixed}</span>
               </p>
@@ -95,9 +91,15 @@ function Checkout() {
                 </label>
               </div>
             </form>
-          }
-          actions={
-            <form method="dialog">
+          )
+        }
+        actions={
+          successCartIsOpen ? (
+            <Button onClick={close} className="button">
+              Okay
+            </Button>
+          ) : (
+            <>
               <Button onClick={close} className="text-button">
                 Close
               </Button>
@@ -105,54 +107,10 @@ function Checkout() {
               <Button onClick={submitOrder} className="button">
                 Submit Order
               </Button>
-            </form>
-          }
-        />
-      )}
-
-      {messageIsSuccess && successCartIsOpen && (
-        <Modal
-          ref={dialog}
-          title="Success!"
-          cart={
-            <form className="control" method="dialog">
-              <p>Your order was submitted successfully.</p>
-              <p>
-                We will get back to you with more detail via email within the
-                new few minutes.
-              </p>
-            </form>
-          }
-          actions={
-            <form method="dialog">
-              <Button onClick={close} className="button">
-                Okay
-              </Button>
-            </form>
-          }
-        />
-      )}
-      {!messageIsSuccess && successCartIsOpen && (
-        <Modal
-          ref={dialog}
-          title="Error!"
-          cart={
-            <form className="control" method="dialog">
-              <p>
-                Missing data: Email, name, street, postal code or city is
-                missing.
-              </p>
-            </form>
-          }
-          actions={
-            <form method="dialog">
-              <Button onClick={close} className="button">
-                Okay
-              </Button>
-            </form>
-          }
-        />
-      )}
+            </>
+          )
+        }
+      />
     </>
   );
 }

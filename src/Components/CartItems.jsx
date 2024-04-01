@@ -3,17 +3,12 @@ import { CartContext } from "../context/cart-context";
 import Button from "./Button";
 
 function CartItems() {
-  const { items, addToCart, removeToCart } = useContext(CartContext);
-
-  const totalItems = items.reduce(
-    (amount, currentPrice) =>
-      (amount + +currentPrice.price) * +currentPrice.quantity,
-    0
-  );
-  const totalItemsFixed = totalItems.toFixed(2);
+  const { items, totalItemsFixed, addToCart, removeToCart } =
+    useContext(CartContext);
 
   return (
     <div className="cart">
+      <h2>Your Cart</h2>
       <ul>
         {items.length === 0 && <p>Nothing here yet... </p>}
         {items.length > 0 &&

@@ -18,10 +18,9 @@ function Cart() {
     <>
       <Modal
         ref={dialog}
-        title="Your Cart"
         cart={<CartItems />}
         actions={
-          <form method="dialog">
+          <>
             <Button onClick={close} className="text-button">
               Close
             </Button>
@@ -34,7 +33,7 @@ function Cart() {
                 Go to Checkout
               </Button>
             )}
-          </form>
+          </>
         }
       />
       <Checkout />
