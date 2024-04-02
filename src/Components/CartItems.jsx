@@ -1,39 +1,18 @@
-import { useContext } from "react";
-import { CartContext } from "../context/cart-context";
-import Button from "./Button";
+import { currencyFormatter } from "../formatting";
 
-function CartItems() {
-  const { items, totalItemsFixed, addToCart, removeToCart } =
-    useContext(CartContext);
-
+function CartItem({ name, quantity, price, onIncrese, onDecrease }) {
   return (
-    <div className="cart">
-      <h2>Your Cart</h2>
-      <ul>
-        {items.length === 0 && <p>Nothing here yet... </p>}
-        {items.length > 0 &&
-          items.map((meal) => {
-            return (
-              <li key={meal.id}>
-                <div className="cart-item">
-                  <p>
-                    <span> {meal.name} </span>- <span>{meal.quantity} x </span>
-                    <span>${meal.price}</span>
-                  </p>
-
-                  <div className="cart-item-actions">
-                    <Button onClick={() => removeToCart(meal)}>-</Button>
-                    <span>{meal.quantity}</span>
-                    <Button onClick={() => addToCart(meal)}>+</Button>
-                  </div>
-                </div>
-              </li>
-            );
-          })}
-      </ul>
-      <p className="cart-total ">${totalItemsFixed}</p>
-    </div>
+    <li className="cart-item">
+      <p>
+        {name} - {quantity} x {currencyFormatter.format(price)}
+      </p>
+      <p className="cart-item-actions">
+        <button onClick={onDecrease}>-</button>
+        <span>{quantity}</span>
+        <button onClick={onIncrese}>+</button>
+      </p>
+    </li>
   );
 }
 
-export default CartItems;
+export default CartItem;

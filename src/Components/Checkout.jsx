@@ -1,117 +1,102 @@
-import { useContext, useRef } from "react";
-import { ModalContext } from "../context/modal-context";
-import { CartContext } from "../context/cart-context";
-import { fetchSubmittedOrder } from "../http";
+import { useContext } from "react";
+import { currencyFormatter } from "../formatting";
 
-import Modal from "./Modal";
+import Input from "./Input";
 import Button from "./Button";
-import { useFetch } from "../hooks/useFetch";
+import Modal from "./Modal";
+import CartContext from "../context/CartContext";
+import UserProgressContext from "../context/UserProgressContext";
+import useHttp from "../http";
+import Error from "./Error";
 
+const resquestConfig = {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json",
+  },
+};
 function Checkout() {
-  const { messageSuccess, setOrder } = useFetch(fetchSubmittedOrder);
+  const { items, clearCart } = useContext(CartContext);
+  const { hideCheckout, progress } = useContext(UserProgressContext);
+  const cartTotal = items
+    .reduce((totalPrice, item) => (totalPrice + item.quantity) * item.price, 0)
+    .toFixed(2);
 
-  const { checkoutIsOpen, successCartIsOpen, successMessage, close } =
-    useContext(ModalContext);
-  const { items, totalItemsFixed } = useContext(CartContext);
+  const {
+    data,
+    isLoading: isSending,
+    error,
+    sendRequest,
+    clearData,
+  } = useHttp("http://localhost:3000/orders", resquestConfig);
 
-  const dialog = useRef();
-  const fullNameOrder = useRef();
-  const emailOrder = useRef();
-  const streetOrder = useRef();
-  const postalCodeOrder = useRef();
-  const cityOrder = useRef();
-
-  function submitOrder() {
-    const datasUser = {
-      items,
-      customer: {
-        name: fullNameOrder.current.value,
-        email: emailOrder.current.value,
-        street: streetOrder.current.value,
-        "postal-code": postalCodeOrder.current.value,
-        city: cityOrder.current.value,
-      },
-    };
-
-    successMessage();
-    setOrder(datasUser);
+  function handleFinish() {
+    hideCheckout();
+    clearCart();
+    clearData();
   }
 
-  if (checkoutIsOpen) dialog?.current?.open();
-  if (successCartIsOpen) dialog?.current?.open();
+  function handleSubmit(e) {
+    e.preventDefault();
+
+    const fd = new FormData(e.target);
+    const customerData = Object.fromEntries(fd.entries());
+
+    sendRequest(
+      JSON.stringify({
+        order: {
+          ...items,
+          customer: customerData,
+        },
+      })
+    );
+  }
+
+  let actions = (
+    <>
+      <Button textOnly type="button" onClick={hideCheckout}>
+        Close
+      </Button>
+      <Button>Submit Order</Button>
+    </>
+  );
+
+  if (isSending) {
+    actions = <span>Sending order data...</span>;
+  }
+
+  if (data && !error) {
+    return (
+      <Modal open={progress === "checkout"} onClose={clearCart}>
+        <h2>Success!</h2>
+        <p>Your order was submitted successfuly</p>
+        <p>
+          We will back to you with more details via email within the next few
+          minutes
+        </p>
+        <p className="modal-actions">
+          <Button onClick={handleFinish}>Okay</Button>
+        </p>
+      </Modal>
+    );
+  }
 
   return (
-    <>
-      <Modal
-        ref={dialog}
-        cart={
-          successCartIsOpen ? (
-            <form className="control" method="dialog">
-              {messageSuccess ? (
-                <>
-                  <h2>Success</h2>
-                  <p>Your order was submitted successfully.</p>
-                  <p>
-                    We will get back to you with more detail via email within
-                    the new few minutes.
-                  </p>
-                </>
-              ) : (
-                <>
-                  <h2>Error</h2>
-                  <p>Your order was not submitted successfully.</p>
-                  <p>Try again in a fill minutes, please!.</p>
-                </>
-              )}
-            </form>
-          ) : (
-            <form className="control" method="dialog">
-              <h2>Checkout</h2>
-              <p>
-                Total amount <span>${totalItemsFixed}</span>
-              </p>
-              <label htmlFor="full-name">Full Name</label>
-              <input type="text" id="full-name" ref={fullNameOrder} />
-
-              <label htmlFor="email">E-Mail Address</label>
-              <input type="email" id="email" ref={emailOrder} />
-
-              <label htmlFor="street">Street</label>
-              <input type="text" id="street" ref={streetOrder} />
-
-              <div className="control-row">
-                <label htmlFor="postal-code">
-                  Postal Code
-                  <input type="number" id="postal-code" ref={postalCodeOrder} />
-                </label>
-
-                <label htmlFor="city">
-                  City
-                  <input type="text" id="city" ref={cityOrder} />
-                </label>
-              </div>
-            </form>
-          )
-        }
-        actions={
-          successCartIsOpen ? (
-            <Button onClick={close} className="button">
-              Okay
-            </Button>
-          ) : (
-            <>
-              <Button onClick={close} className="text-button">
-                Close
-              </Button>
-
-              <Button onClick={submitOrder} className="button">
-                Submit Order
-              </Button>
-            </>
-          )
-        }
-      />
-    </>
+    <Modal open={progress === "checkout"} onClose={hideCheckout}>
+      <form method="dialog" onSubmit={handleSubmit}>
+        <h2>Checkout</h2>
+        <p>Total Amount: {currencyFormatter.format(cartTotal)}</p>
+        <Input id="name" label="Full name" type="text" />
+        <Input id="email" label="E-Mail Adress" type="email" />
+        <Input id="street" label="Street" type="text" />
+        <div className="control-row">
+          <Input id="postal-code" label="Postal Code" type="number" />
+          <Input id="city" label="City" type="text" />
+        </div>
+        {error && <Error title="Failed to submit order" message={error} />}
+        <p className="modal-actions">{actions}</p>
+      </form>
+    </Modal>
   );
 }
 

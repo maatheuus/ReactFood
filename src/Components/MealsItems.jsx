@@ -1,32 +1,30 @@
 import { useContext } from "react";
-import { CartContext } from "../context/cart-context";
+import { currencyFormatter } from "../formatting";
 import Button from "./Button";
+import CartContext from "../context/CartContext";
 
-function MealsItems({ isLoading, mealsItems, fallBackText }) {
-  const { addToCart } = useContext(CartContext);
+function MealItem({ meal }) {
+  const { addItems } = useContext(CartContext);
 
   return (
-    <div id="meals">
-      {isLoading && <p>{fallBackText}</p>}
-      {!isLoading &&
-        mealsItems.length > 0 &&
-        mealsItems.map((items) => {
-          return (
-            <div key={items.id} className="meal-item">
-              <img src={`http://localhost:3000/${items.image}`} alt="" />
-              <h3>{items.name}</h3>
-              <div className="meal-item-price">$${items.price}</div>
-              <div className="meal-item-description">{items.description}</div>
-              <div className="meal-item-actions">
-                <Button onClick={() => addToCart(items)} className="button">
-                  Add to cart
-                </Button>
-              </div>
-            </div>
-          );
-        })}
-    </div>
+    <li key={meal.id} className="meal-item">
+      <article>
+        <img src={`http://localhost:3000/${meal.image}`} alt={meal.name} />
+
+        <div>
+          <h3>{meal.name}</h3>
+          <p className="meal-item-price">
+            {currencyFormatter.format(meal.price)}
+          </p>
+          <p className="meal-item-description">{meal.description}</p>
+        </div>
+
+        <p className="meal-item-actions">
+          <Button onClick={() => addItems(meal)}>Add to cart</Button>
+        </p>
+      </article>
+    </li>
   );
 }
 
-export default MealsItems;
+export default MealItem;

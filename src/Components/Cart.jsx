@@ -1,43 +1,47 @@
-import { useContext, useRef } from "react";
-import { ModalContext } from "../context/modal-context";
-import { CartContext } from "../context/cart-context";
+import { useContext } from "react";
+import { currencyFormatter } from "../formatting";
 
+import UserProgressContext from "../context/UserProgressContext";
+import CartContext from "../context/CartContext";
+import CartItem from "./CartItems";
 import Modal from "./Modal";
-import CartItems from "./CartItems";
 import Button from "./Button";
-import Checkout from "./Checkout";
 
 function Cart() {
-  const dialog = useRef();
-  const { cartIsOpen, close, checkoutModal } = useContext(ModalContext);
-  const { items } = useContext(CartContext);
+  const { items, addItems, removeItem } = useContext(CartContext);
+  const { progress, hideCart, showCheckout } = useContext(UserProgressContext);
 
-  if (cartIsOpen) dialog?.current?.open();
+  const cartTotal = items
+    .reduce((totalPrice, item) => (totalPrice + item.quantity) * item.price, 0)
+    .toFixed(2);
 
   return (
-    <>
-      <Modal
-        ref={dialog}
-        cart={<CartItems />}
-        actions={
-          <>
-            <Button onClick={close} className="text-button">
-              Close
-            </Button>
-            {items.length === 0 ? (
-              <Button onClick={close} className="button">
-                Go to Shop
-              </Button>
-            ) : (
-              <Button onClick={checkoutModal} className="button">
-                Go to Checkout
-              </Button>
-            )}
-          </>
-        }
-      />
-      <Checkout />
-    </>
+    <Modal
+      className="cart"
+      open={progress === "cart"}
+      onClose={progress === "cart" ? hideCart : null}
+    >
+      <h2>Your Cart</h2>
+      <ul>
+        {items.map((item) => (
+          <CartItem
+            key={item.id}
+            {...item}
+            onIncrese={() => addItems(item)}
+            onDecrease={() => removeItem(item.id)}
+          />
+        ))}
+      </ul>
+      <p className="cart-total">{currencyFormatter.format(cartTotal)}</p>
+      <p className="modal-actions">
+        <Button textOnly onClick={hideCart}>
+          Close{" "}
+        </Button>
+        {items.length > 0 && (
+          <Button onClick={showCheckout}>Go to Checkout </Button>
+        )}
+      </p>
+    </Modal>
   );
 }
 

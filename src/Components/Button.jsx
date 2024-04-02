@@ -1,6 +1,9 @@
-function Button({ onClick, children, ...props }) {
+function Button({ children, textOnly, className, ...props }) {
+  const cssClasses = textOnly
+    ? `text-button ${className}`
+    : `button ${className}`;
   return (
-    <button onClick={onClick} {...props}>
+    <button className={cssClasses} {...props}>
       {children}
     </button>
   );

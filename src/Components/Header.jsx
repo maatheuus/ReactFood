@@ -1,23 +1,28 @@
 import { useContext } from "react";
-import { CartContext } from "../context/cart-context";
+import CartContext from "../context/CartContext";
+import UserProgressContext from "../context/UserProgressContext";
 
 import imageLogo from "../assets/logo.jpg";
 import Button from "./Button";
-import { ModalContext } from "../context/modal-context";
 
 function Header() {
   const { items } = useContext(CartContext);
-  const { cartModal } = useContext(ModalContext);
+  const { showCart } = useContext(UserProgressContext);
 
+  const totalCartItems = items.reduce((totalNumberOfItems, item) => {
+    return totalNumberOfItems + item.quantity;
+  }, 0);
   return (
     <header id="main-header">
-      <h1 id="title">
+      <div id="title">
         <img src={imageLogo} alt="image logo of the site" />
-        ReactFood
-      </h1>
-      <Button onClick={cartModal} className="text-button">
-        Cart ({items?.length})
-      </Button>
+        <h1>ReactFood</h1>
+      </div>
+      <nav>
+        <Button textOnly onClick={showCart}>
+          Cart ({totalCartItems})
+        </Button>
+      </nav>
     </header>
   );
 }

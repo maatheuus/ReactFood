@@ -1,28 +1,55 @@
-export async function fetchAvailableMeals() {
-  const request = await fetch("http://localhost:3000/meals");
+import { useCallback, useEffect, useState } from "react";
 
-  if (!request.ok) throw new Error("Couldn't fetch available meals");
+async function sendHttpRequest(url, config) {
+  const response = await fetch(url, config);
 
-  const response = await request.json();
+  const restData = await response.json();
 
-  return response;
+  if (!response.ok) {
+    throw new Error(
+      restData.message || "Something went wrong, failed to send request"
+    );
+  }
+
+  return restData;
 }
 
-export async function fetchSubmittedOrder(order = null) {
-  if (order === null) return;
+function useHttp(url, config, initialData) {
+  const [data, setData] = useState(initialData);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState();
 
-  const header = {
-    method: "POST",
-    body: JSON.stringify({ order }),
-    headers: {
-      "Content-Type": "application/json",
+  function clearData() {
+    setData(initialData);
+  }
+
+  const sendRequest = useCallback(
+    async function sendRequest(data) {
+      setIsLoading(true);
+      try {
+        const resData = await sendHttpRequest(url, { ...config, body: data });
+        setData(resData);
+      } catch (error) {
+        setError(error.message || "Something went wrong");
+      }
+      setIsLoading(false);
     },
+    [url, config]
+  );
+
+  useEffect(() => {
+    if ((config && (config.method === "GET" || !config.method)) || !config) {
+      sendRequest();
+    }
+  }, [sendRequest, config]);
+
+  return {
+    data,
+    isLoading,
+    error,
+    sendRequest,
+    clearData,
   };
-  const request = await fetch("http://localhost:3000/orders", header);
-
-  if (!request.ok) throw new Error(request.message);
-
-  const response = await request.json();
-
-  return response;
 }
+
+export default useHttp;
