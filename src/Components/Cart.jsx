@@ -11,9 +11,10 @@ function Cart() {
   const { items, addItems, removeItem } = useContext(CartContext);
   const { progress, hideCart, showCheckout } = useContext(UserProgressContext);
 
-  const cartTotal = items
-    .reduce((totalPrice, item) => (totalPrice + item.quantity) * item.price, 0)
-    .toFixed(2);
+  const cartTotal = items.reduce(
+    (totalPrice, item) => (totalPrice + +item.price) * item.quantity,
+    0
+  );
 
   return (
     <Modal

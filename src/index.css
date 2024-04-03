@@ -20,6 +20,13 @@ body {
   padding: 3rem 10%;
 }
 
+@media (max-width: 33rem) {
+  #main-header {
+    flex-direction: column;
+    height: 15rem;
+  }
+}
+
 #main-header #title {
   display: flex;
   gap: 1rem;
