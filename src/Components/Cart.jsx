@@ -32,11 +32,13 @@ function Cart() {
           />
         ))}
       </ul>
+      {items.length === 0 && <p>Add some food to the cart 😃</p>}
       <p className="cart-total">{currencyFormatter.format(cartTotal)}</p>
       <p className="modal-actions">
         <Button textOnly onClick={hideCart}>
           Close{" "}
         </Button>
+
         {items.length > 0 && (
           <Button onClick={showCheckout}>Go to Checkout </Button>
         )}
