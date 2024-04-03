@@ -9,9 +9,6 @@ function Header() {
   const { items } = useContext(CartContext);
   const { showCart } = useContext(UserProgressContext);
 
-  const totalCartItems = items.reduce((totalNumberOfItems, item) => {
-    return totalNumberOfItems + item.quantity;
-  }, 0);
   return (
     <header id="main-header">
       <div id="title">
@@ -20,7 +17,7 @@ function Header() {
       </div>
       <nav>
         <Button textOnly onClick={showCart}>
-          Cart ({totalCartItems})
+          Cart ({items.length})
         </Button>
       </nav>
     </header>
