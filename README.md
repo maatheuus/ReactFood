@@ -17,7 +17,7 @@ As tecnologias usadas foram:
 
 ## Detalhes backend
 
-- Node.js: Foi criado para armazenar os pedidos e mostrar erros caso não tenha algum dado do formulário correspondente.
+- Node.js: Foi criado para armazenar os pedidos e mostrar erros caso não tenha algum dado do formulário correspondente. Para iniciar esse projeto você precisa entrar no seu terminal, entrar na pasta "backend" e digitar: node app.js.
 
 ##
 
